@@ -1,5 +1,3 @@
-"use client";
-
 import { Card } from "@mui/material";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -7,7 +5,9 @@ import Typography from "@mui/material/Typography";
 
 const drawerWidth = 200;
 
-const DashboardView = () => {
+const DashboardView = async () => {
+
+  
   return (
     <Box
       component="main"
