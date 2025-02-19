@@ -15,7 +15,10 @@ import { styled } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { cookies } from "next/headers";
+import { useRouter } from "next/navigation";
+
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -60,8 +63,9 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignIn() {
+
   const { login, user } = useAuth();
-  console.log(user);
+  const router = useRouter()
 
   const {
     register,
@@ -71,10 +75,14 @@ export default function SignIn() {
 
 
   const onSubmit = async (data: any) => {
-    console.log(data);
+
     try {
-      const res = await login(data.email, data.password);
-      console.log(res);
+      await login(data.email, data.password);
+      toast.success(`Login Success ${user.name}!`)
+
+      if(user){
+        router.push("/")
+      }
     } catch (error) {
       console.log(error);
     }

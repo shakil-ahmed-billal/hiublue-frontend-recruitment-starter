@@ -36,7 +36,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!response.ok) throw new Error("Login failed");
 
       const data = await response.json();
-      console.log(data);
       if(data){
         setUser(data.user);
         setToken(data.token);

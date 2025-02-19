@@ -1,6 +1,8 @@
 
 
+import CreateOfferForm from "@/components/Onboarding/OnboardingForm";
 import { Box, Toolbar, Typography } from "@mui/material";
+import { junit } from "node:test/reporters";
 
 export default function OnboardingView() {
   return (
@@ -13,8 +15,12 @@ export default function OnboardingView() {
       }}
     >
       <Toolbar />
-      <Box>
-        <Typography variant="h5">Dashboard</Typography>
+      <Box style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+      }}>
+        <CreateOfferForm/>
       </Box>
     </Box>
   );
