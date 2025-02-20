@@ -16,6 +16,8 @@ import { useTheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import LocalMallTwoToneIcon from '@mui/icons-material/LocalMallTwoTone';
+import DonutSmallTwoToneIcon from '@mui/icons-material/DonutSmallTwoTone';
 import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
@@ -60,9 +62,9 @@ export default function Sidebar({ children }: sidebarProps) {
                 <ListItemButton>
                   <ListItemIcon>
                     {index % 2 === 0 ? (
-                      <img src="/item-icon.png" alt="" />
+                      <DonutSmallTwoToneIcon/>
                     ) : (
-                      <img src="/item-icon2.png" alt="" />
+                      <LocalMallTwoToneIcon/>
                     )}
                   </ListItemIcon>
                   <ListItemText primary={text} />

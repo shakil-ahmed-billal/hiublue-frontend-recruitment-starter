@@ -1,0 +1,152 @@
+"use client";
+
+import { Card, CardContent, Grid, Typography } from "@mui/material";
+import dynamic from "next/dynamic";
+import React, { useEffect, useState } from "react";
+
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
+
+type DashboardData = {
+  current: {
+    active_users: number;
+    clicks: number;
+    appearance: number;
+  };
+  previous: {
+    active_users: number;
+    clicks: number;
+    appearance: number;
+  };
+  website_visits: {
+    labels: string[];
+    desktop: number[];
+    mobile: number[];
+  };
+  offers_sent: number[];
+};
+
+const Dashboard: React.FC = () => {
+  const [data, setData] = useState<DashboardData | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const summaryRes = await fetch(
+          "https://dummy-1.hiublue.com/api/dashboard/summary?filter=this-week",
+          {
+            headers: { Authorization: "Bearer fake-jwt-token" },
+          }
+        );
+        const summaryData = await summaryRes.json();
+
+        const statsRes = await fetch(
+          "https://dummy-1.hiublue.com/api/dashboard/stat?filter=this-week",
+          {
+            headers: { Authorization: "Bearer fake-jwt-token" },
+          }
+        );
+        const statsData = await statsRes.json();
+
+        setData({
+          current: summaryData.current,
+          previous: summaryData.previous,
+          website_visits: {
+            labels: Object.keys(statsData.website_visits),
+            desktop: Object.values(statsData.website_visits).map(
+              (v: any) => v.desktop
+            ),
+            mobile: Object.values(statsData.website_visits).map(
+              (v: any) => v.mobile
+            ),
+          },
+          offers_sent: Object.values(statsData.offers_sent),
+        });
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Handle loading state
+  if (!data) {
+    return <Typography>Loading...</Typography>;
+  }
+
+  const websiteVisitsOptions = {
+    chart: { type: "bar" },
+    xaxis: { categories: data.website_visits.labels },
+    colors: ["#007867", "#FFAB00"],
+  };
+
+  const websiteVisitsSeries = [
+    { name: "Desktop", data: data.website_visits.desktop },
+    { name: "Mobile", data: data.website_visits.mobile },
+  ];
+
+  const offersSentOptions = {
+    chart: { type: "line" },
+    xaxis: { categories: data.website_visits.labels },
+    stroke: { curve: "smooth" },
+  };
+
+  const offersSentSeries = [{ name: "Offers Sent", data: data.offers_sent }];
+
+  return (
+    <div style={{ marginBottom: "30px" }}>
+      <Typography variant="h5" gutterBottom>
+        Dashboard
+      </Typography>
+      <Grid container spacing={3} marginBottom={3}>
+        {["active_users", "clicks", "appearance"].map((key) => (
+          <Grid item xs={12} sm={4} key={key}>
+            <Card>
+              <CardContent>
+                <Typography
+                  color="textSecondary"
+                  variant="subtitle2"
+                  gutterBottom>
+                  {key.replace("_", " ")}
+                </Typography>
+                <Typography variant="h6">
+                  {data.current[key as keyof DashboardData["current"]]}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Website Visits</Typography>
+              <Chart
+                options={websiteVisitsOptions}
+                series={websiteVisitsSeries}
+                type="bar"
+                height={300}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Offers Sent</Typography>
+              <Chart
+                options={offersSentOptions}
+                series={offersSentSeries}
+                type="line"
+                height={300}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </div>
+  );
+};
+
+export default Dashboard;
