@@ -18,21 +18,37 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import toast from "react-hot-toast";
+
+// Validation Schema
+const schema = yup.object().shape({
+  planType: yup.string().required("Plan type is required"),
+  additions: yup.object().shape({
+    refundable: yup.boolean(),
+    onDemand: yup.boolean(),
+    negotiable: yup.boolean(),
+  }),
+  user: yup.string().required("User is required"),
+  expired: yup.mixed<Dayjs>().required("Expiration date is required").typeError("Invalid date"),
+  price: yup.number().required("Price is required").positive("Price must be a positive number"),
+});
 
 interface FormData {
   planType: string;
   additions: {
-    refundable: boolean;
-    onDemand: boolean;
-    negotiable: boolean;
+    refundable?: boolean;
+    onDemand?: boolean;
+    negotiable?: boolean;
   };
   user: string;
-  expired: Dayjs | null;
-  price: string;
+  expired: Dayjs;
+  price: number;
 }
 
 const CreateOfferForm: React.FC = () => {
-  const { control, handleSubmit } = useForm<FormData>({
+  const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
     defaultValues: {
       planType: "monthly",
       additions: {
@@ -40,14 +56,42 @@ const CreateOfferForm: React.FC = () => {
         onDemand: false,
         negotiable: false,
       },
-      user: "Jason Momoa",
+      user: "",
       expired: dayjs(),
-      price: "",
+      price: 0,
     },
+    resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data: FormData) => {
-    console.log("Form Data:", data);
+  const onSubmit = async (data: FormData) => {
+    const formattedData = {
+      plan_type: data.planType,
+      additions: Object.keys(data.additions).filter(
+        (key) => data.additions[key as keyof typeof data.additions]
+      ),
+      user_id: data.user,
+      expired: dayjs(data.expired).format("YYYY-MM-DD"),
+      price: data.price,
+    };
+
+    console.log("Final Data:", formattedData);
+    const req: Response = await fetch(
+      `https://dummy-1.hiublue.com/api/offers`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer fake-jwt-token",
+        },
+        body: JSON.stringify(formattedData),
+      }
+    );
+    if (req.ok) {
+      console.log(req);
+      toast.success("Offer created successfully!");
+    } else {
+      toast.error("Failed to create offer");
+    }
   };
 
   return (
@@ -94,6 +138,9 @@ const CreateOfferForm: React.FC = () => {
               </RadioGroup>
             )}
           />
+          {errors.planType && (
+            <Typography color="error">{errors.planType.message}</Typography>
+          )}
         </FormControl>
 
         {/* Additions */}
@@ -141,15 +188,18 @@ const CreateOfferForm: React.FC = () => {
             control={control}
             render={({ field }) => (
               <Select {...field} fullWidth>
-                <MenuItem value="Jason Momoa">Jason Momoa</MenuItem>
-                <MenuItem value="John Doe">John Doe</MenuItem>
-                <MenuItem value="Emma Watson">Emma Watson</MenuItem>
+                <MenuItem value="1">Jason Momoa</MenuItem>
+                <MenuItem value="2">John Doe</MenuItem>
+                <MenuItem value="3">Emma Watson</MenuItem>
               </Select>
             )}
           />
+          {errors.user && (
+            <Typography color="error">{errors.user.message}</Typography>
+          )}
         </FormControl>
 
-        {/* Expired Date Picker - FIXED */}
+        {/* Expired Date Picker */}
         <FormControl fullWidth margin="normal">
           <FormLabel>Expired</FormLabel>
           <Controller
@@ -164,6 +214,9 @@ const CreateOfferForm: React.FC = () => {
               />
             )}
           />
+          {errors.expired && (
+            <Typography color="error">{errors.expired.message}</Typography>
+          )}
         </FormControl>
 
         {/* Price Input */}
@@ -181,6 +234,9 @@ const CreateOfferForm: React.FC = () => {
               />
             )}
           />
+          {errors.price && (
+            <Typography color="error">{errors.price.message}</Typography>
+          )}
         </FormControl>
 
         {/* Submit Button */}

@@ -20,6 +20,7 @@ import {
   InputLabel,
   Chip,
   IconButton,
+  SelectChangeEvent,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -66,7 +67,7 @@ const OfferTable: React.FC = () => {
     setSearchQuery(event.target.value);
   };
 
-  const handleTypeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+  const handleTypeChange = (event: SelectChangeEvent<string>) => {
     setFilterType(event.target.value as string);
   };
 
@@ -155,7 +156,7 @@ const OfferTable: React.FC = () => {
                   </TableCell>
                   <TableCell style={{
                     display: "flex",
-                    alignItems : "center"
+                    alignItems: "center",
                   }}>
                     <IconButton color="primary">
                       <EditIcon />

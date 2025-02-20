@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
   }
 
   const websiteVisitsOptions = {
-    chart: { type: "bar" },
+    chart: { type: "bar" as const },
     xaxis: { categories: data.website_visits.labels },
     colors: ["#007867", "#FFAB00"],
   };
@@ -86,9 +86,9 @@ const Dashboard: React.FC = () => {
   ];
 
   const offersSentOptions = {
-    chart: { type: "line" },
+    chart: { type: "line" as const },
     xaxis: { categories: data.website_visits.labels },
-    stroke: { curve: "smooth" },
+    stroke: { curve: "smooth" as const },
   };
 
   const offersSentSeries = [{ name: "Offers Sent", data: data.offers_sent }];
