@@ -14,10 +14,10 @@ import Stack from "@mui/material/Stack";
 import { styled } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { cookies } from "next/headers";
 import { useRouter } from "next/navigation";
-
 import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import toast from "react-hot-toast";
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -62,29 +62,31 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function SignIn() {
+// Validation Schema
+const schema = yup.object().shape({
+  email: yup.string().email("Invalid email format").required("Email is required"),
+  password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+});
 
+export default function SignIn() {
   const { login, user } = useAuth();
-  const router = useRouter()
+  const router = useRouter();
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm();
-
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
   const onSubmit = async (data: any) => {
-
     try {
       await login(data.email, data.password);
-      toast.success(`Login Success ${user.name}!`)
-
-      if(user){
-        router.push("/")
-      }
+      router.push("/");
+      toast.success(`Login Success ${user?.name || ""}!`);
     } catch (error) {
-      console.log(error);
+      toast.error("Login failed. Please check your credentials.");
     }
   };
 
@@ -120,28 +122,29 @@ export default function SignIn() {
                 name="email"
                 placeholder="your@email.com"
                 autoComplete="email"
-                autoFocus
-                required
                 fullWidth
                 variant="outlined"
                 size="small"
                 sx={{ mt: 1 }}
+                error={!!errors.email}
+                helperText={errors.email?.message}
               />
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
-                id="password"
                 {...register("password")}
+                id="password"
                 name="password"
                 placeholder="••••••"
                 type="password"
                 autoComplete="current-password"
-                required
                 fullWidth
                 variant="outlined"
                 size="small"
                 sx={{ mt: 1 }}
+                error={!!errors.password}
+                helperText={errors.password?.message}
               />
             </FormControl>
             <FormControlLabel
@@ -152,9 +155,9 @@ export default function SignIn() {
               type="submit"
               fullWidth
               variant="contained"
-              onClick={() => {}}
+              disabled={isSubmitting}
             >
-              Sign in
+              {isSubmitting ? "Signing in..." : "Sign in"}
             </Button>
             <Link
               component="button"
