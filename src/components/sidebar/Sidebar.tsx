@@ -1,7 +1,9 @@
 "use client";
 
-import DashboardView from "@/sections/dashboard/views/dashboard-view";
-import { Avatar, IconButton } from "@mui/material";
+import useAuth from "@/hooks/useAuth";
+import DonutSmallTwoToneIcon from "@mui/icons-material/DonutSmallTwoTone";
+import LocalMallTwoToneIcon from "@mui/icons-material/LocalMallTwoTone";
+import { Avatar, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -16,8 +18,6 @@ import { useTheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import LocalMallTwoToneIcon from '@mui/icons-material/LocalMallTwoTone';
-import DonutSmallTwoToneIcon from '@mui/icons-material/DonutSmallTwoTone';
 import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
@@ -30,11 +30,30 @@ interface sidebarProps {
 
 export default function Sidebar({ children }: sidebarProps) {
   const theme = useTheme();
+  const { user , logout} = useAuth();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleLogout = async() =>{
+    logout();
+  }
+
+  // menu bar
+  const settings = ["Profile", "Dashboard", "Logout"];
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
+    null
+  );
+
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
   };
 
   const drawer = (
@@ -62,9 +81,9 @@ export default function Sidebar({ children }: sidebarProps) {
                 <ListItemButton>
                   <ListItemIcon>
                     {index % 2 === 0 ? (
-                      <DonutSmallTwoToneIcon/>
+                      <DonutSmallTwoToneIcon />
                     ) : (
-                      <LocalMallTwoToneIcon/>
+                      <LocalMallTwoToneIcon />
                     )}
                   </ListItemIcon>
                   <ListItemText primary={text} />
@@ -111,9 +130,42 @@ export default function Sidebar({ children }: sidebarProps) {
                 <>Menu</>
               </IconButton>
             )}
-            <Image src="/logo-hiu.png" alt="logo" width={40} height={40} />
+            <Link href="/">
+              <Image src="/logo-hiu.png" alt="logo" width={40} height={40} />
+            </Link>
           </>
-          <Avatar />
+          {/* menu bar */}
+          <Box sx={{ flexGrow: 0 }}>
+            <Tooltip title="Open settings">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                <Avatar alt="Remy Sharp" src={user ? "/account.png" : ""} />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              sx={{ mt: "45px" }}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              {settings.map((setting) => (
+                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                  <Typography onClick={handleLogout} sx={{ textAlign: "center" }}>
+                    {setting}
+                  </Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
         </Box>
       </AppBar>
       <Box

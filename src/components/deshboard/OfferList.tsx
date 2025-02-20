@@ -153,7 +153,10 @@ const OfferTable: React.FC = () => {
                       color={getStatusChipColor(offer.status)}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell style={{
+                    display: "flex",
+                    alignItems : "center"
+                  }}>
                     <IconButton color="primary">
                       <EditIcon />
                     </IconButton>

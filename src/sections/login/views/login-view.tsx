@@ -78,11 +78,9 @@ export default function SignIn() {
 
     try {
       await login(data.email, data.password);
+      router.push("/");
       toast.success(`Login Success ${user.name}!`)
-
-      if(user){
-        router.push("/")
-      }
+      
     } catch (error) {
       console.log(error);
     }

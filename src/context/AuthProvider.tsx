@@ -1,20 +1,24 @@
 "use client";
+
 import React, { createContext, useEffect, useState } from "react";
 
-interface authType {
+interface AuthType {
   user: any;
-  logout: () => void;
   token: string | null;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
 }
-export const AuthContext = createContext<authType | null>(null);
+
+export const AuthContext = createContext<AuthType | null>(null);
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true); 
 
+  // Load user from localStorage on initial mount
   useEffect(() => {
-    // get suer form local storage
     const savedUser = localStorage.getItem("user");
     const savedToken = localStorage.getItem("token");
 
@@ -22,10 +26,12 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(JSON.parse(savedUser));
       setToken(savedToken);
     }
+    setLoading(false); // Set loading false after checking auth
   }, []);
 
-  //   user login function
+  // ✅ User login function
   const login = async (email: string, password: string) => {
+    setLoading(true);
     try {
       const response = await fetch("https://dummy-1.hiublue.com/api/login", {
         method: "POST",
@@ -36,35 +42,31 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!response.ok) throw new Error("Login failed");
 
       const data = await response.json();
-      if(data){
-        setUser(data.user);
-        setToken(data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        localStorage.setItem("token", data.token);
-      }
-      return data;
+      setUser(data.user);
+      setToken(data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
     } catch (error) {
-      // console.error(error);
-      throw new Error("Login failed");
+      console.error("Login failed:", error);
+      throw error;
+    } finally {
+      setLoading(false); // Always stop loading
     }
   };
 
+  // User logout function
   const logout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-  };
-
-  const authInfo = {
-    user,
-    token,
-    logout,
-    login,
+    setLoading(false); // Stop loading after logout
   };
 
   return (
-    <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
