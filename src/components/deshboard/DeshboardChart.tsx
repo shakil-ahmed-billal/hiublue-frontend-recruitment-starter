@@ -1,7 +1,14 @@
 "use client";
 
 import EjectIcon from "@mui/icons-material/Eject";
-import { Card, CardContent, Grid, Typography } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Grid,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
 import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 
@@ -28,12 +35,13 @@ type DashboardData = {
 
 const Dashboard: React.FC = () => {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [filter, setFilter] = useState("this-week");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const summaryRes = await fetch(
-          "https://dummy-1.hiublue.com/api/dashboard/summary?filter=this-week",
+          `https://dummy-1.hiublue.com/api/dashboard/summary?filter=${filter}`,
           {
             headers: { Authorization: "Bearer fake-jwt-token" },
           }
@@ -41,7 +49,7 @@ const Dashboard: React.FC = () => {
         const summaryData = await summaryRes.json();
 
         const statsRes = await fetch(
-          "https://dummy-1.hiublue.com/api/dashboard/stat?filter=this-week",
+          `https://dummy-1.hiublue.com/api/dashboard/stat?filter=${filter}`,
           {
             headers: { Authorization: "Bearer fake-jwt-token" },
           }
@@ -68,7 +76,7 @@ const Dashboard: React.FC = () => {
     };
 
     fetchData();
-  }, []);
+  }, [filter]);
 
   // Handle loading state
   if (!data) {
@@ -96,9 +104,27 @@ const Dashboard: React.FC = () => {
 
   return (
     <div style={{ marginBottom: "30px" }}>
-      <Typography variant="h5" gutterBottom>
-        Dashboard
-      </Typography>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          margin: "20px 0",
+        }}
+        className=""
+      >
+        <Typography variant="h5" gutterBottom>
+          Dashboard
+        </Typography>
+        <Select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          label="Data"
+        >
+          <MenuItem value="this-week">This Week</MenuItem>
+          <MenuItem value="prev-week"> Prev Week</MenuItem>
+        </Select>
+      </div>
       <Grid container spacing={3} marginBottom={3}>
         {["active_users", "clicks", "appearance"].map((key) => (
           <Grid item xs={12} sm={4} key={key}>
