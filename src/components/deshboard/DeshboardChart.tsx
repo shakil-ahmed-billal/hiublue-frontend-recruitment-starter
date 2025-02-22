@@ -1,5 +1,6 @@
 "use client";
 
+import EjectIcon from "@mui/icons-material/Eject";
 import { Card, CardContent, Grid, Typography } from "@mui/material";
 import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
@@ -81,8 +82,8 @@ const Dashboard: React.FC = () => {
   };
 
   const websiteVisitsSeries = [
-    { name: "Desktop", data: data.website_visits.desktop },
-    { name: "Mobile", data: data.website_visits.mobile },
+    { name: "Desktop Visits", data: data.website_visits.desktop },
+    { name: "Mobile Visits", data: data.website_visits.mobile },
   ];
 
   const offersSentOptions = {
@@ -103,14 +104,18 @@ const Dashboard: React.FC = () => {
           <Grid item xs={12} sm={4} key={key}>
             <Card>
               <CardContent>
-                <Typography
-                  color="textSecondary"
-                  variant="subtitle2"
-                  gutterBottom>
+                <Typography color="black" variant="h4" gutterBottom>
                   {key.replace("_", " ")}
                 </Typography>
-                <Typography variant="h6">
-                  {data.current[key as keyof DashboardData["current"]]}
+                <Typography variant="h4">
+                  {parseFloat(
+                    data.current[key as keyof typeof data.current].toString()
+                  ) / 1000}
+                  K
+                </Typography>
+                <Typography color="textSecondary">
+                  <EjectIcon />
+                  {"Previous " + key.replace("_", " ")}
                 </Typography>
               </CardContent>
             </Card>

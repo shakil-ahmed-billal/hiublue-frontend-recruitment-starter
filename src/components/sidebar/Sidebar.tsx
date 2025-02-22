@@ -3,6 +3,7 @@
 import useAuth from "@/hooks/useAuth";
 import DonutSmallTwoToneIcon from "@mui/icons-material/DonutSmallTwoTone";
 import LocalMallTwoToneIcon from "@mui/icons-material/LocalMallTwoTone";
+import MenuIcon from "@mui/icons-material/Menu";
 import { Avatar, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -30,17 +31,18 @@ interface sidebarProps {
 
 export default function Sidebar({ children }: sidebarProps) {
   const theme = useTheme();
-  const { user , logout} = useAuth();
+  const { user, logout } = useAuth();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
+  const navLink = ["Dashboard", "Onboarding"];
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleLogout = async() =>{
+  const handleLogout = async () => {
     logout();
-  }
+  };
 
   // menu bar
   const settings = ["Profile", "Dashboard", "Logout"];
@@ -69,14 +71,14 @@ export default function Sidebar({ children }: sidebarProps) {
           >
             OVERVIEW
           </Typography>
-          {["Dashboard", "Onboarding"].map((text, index) => (
+          {navLink.map((text, index) => (
             <ListItem key={text} disablePadding>
               <Link
                 style={{
                   color: "black",
                   textDecoration: "none",
                 }}
-                href={`/${text === "Dashboard" ? "/" : "onboarding"}`}
+                href={`${text === "Dashboard" ? "/" : "/onboarding"}`}
               >
                 <ListItemButton>
                   <ListItemIcon>
@@ -127,7 +129,7 @@ export default function Sidebar({ children }: sidebarProps) {
                 onClick={handleDrawerToggle}
                 sx={{ mr: 2 }}
               >
-                <>Menu</>
+                <MenuIcon />
               </IconButton>
             )}
             <Link href="/">
@@ -159,7 +161,10 @@ export default function Sidebar({ children }: sidebarProps) {
             >
               {settings.map((setting) => (
                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography onClick={handleLogout} sx={{ textAlign: "center" }}>
+                  <Typography
+                    onClick={handleLogout}
+                    sx={{ textAlign: "center" }}
+                  >
                     {setting}
                   </Typography>
                 </MenuItem>
